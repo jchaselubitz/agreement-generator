@@ -159,8 +159,7 @@ function generateDrawInputs() {
 }
 
 function generatePaymentInputs() {
-  const paymentCount =
-    parseInt(document.getElementById("payment_count").value) || 0;
+  const paymentCount = parseInt(document.getElementById("payment_count").value) || 0;
   const container = document.getElementById("payments-container");
 
   container.innerHTML = "";
