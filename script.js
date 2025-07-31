@@ -19,12 +19,45 @@ let usdToGbpRate = null;
 
 async function fetchExchangeRate() {
   try {
-    const response = await fetch(
-      "https://api.exchangerate.host/latest?base=USD&symbols=GBP"
-    );
-    if (!response.ok) throw new Error("Network response was not ok");
-    const data = await response.json();
-    usdToGbpRate = data.rates.GBP;
+    // Try multiple free exchange rate APIs as fallbacks
+    const apis = [
+      "https://api.exchangerate.host/latest?base=USD&symbols=GBP",
+      "https://open.er-api.com/v6/latest/USD",
+      "https://api.frankfurter.app/latest?from=USD&to=GBP",
+    ];
+
+    let success = false;
+
+    for (const apiUrl of apis) {
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) continue;
+
+        const data = await response.json();
+
+        // Handle different API response formats
+        if (apiUrl.includes("exchangerate.host")) {
+          if (data.success === false) continue;
+          usdToGbpRate = data.rates.GBP;
+        } else if (apiUrl.includes("open.er-api.com")) {
+          usdToGbpRate = data.rates.GBP;
+        } else if (apiUrl.includes("frankfurter.app")) {
+          usdToGbpRate = data.rates.GBP;
+        }
+
+        success = true;
+        console.log(`Exchange rate fetched successfully from ${apiUrl}`);
+        break;
+      } catch (apiError) {
+        console.warn(`Failed to fetch from ${apiUrl}:`, apiError);
+        continue;
+      }
+    }
+
+    if (!success) {
+      console.error("All exchange rate APIs failed");
+      return;
+    }
 
     // Update GBP display if credit limit already entered
     const creditInput = document.getElementById("credit_limit");
@@ -63,10 +96,8 @@ function updateContractDisplay(fieldId, value) {
     const gbpElement = document.getElementById("display_credit_limit_gbp");
 
     if (value.trim() === "") {
-      if (usdElement)
-        usdElement.textContent = `[Amount]`;
-      if (gbpElement)
-        gbpElement.textContent = `[GBP Amount]`;
+      if (usdElement) usdElement.textContent = `[Amount]`;
+      if (gbpElement) gbpElement.textContent = `[GBP Amount]`;
       return;
     }
 
