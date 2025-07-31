@@ -21,6 +21,8 @@ agreement-generator/
 - **PDF Export**: Generate professional PDF documents using browser print functionality
 - **Form Validation**: Ensures required fields are completed before PDF generation
 - **Modern UI**: Clean, professional interface with smooth animations
+- **Payment Tracking**: Enter payments to see principal/interest breakdown and current balance
+- **CSV History**: Export withdrawals/payments to CSV and import later to restore them
 
 ## Usage
 
@@ -28,6 +30,7 @@ agreement-generator/
 2. **Fill Out the Form**: Enter the required information in the left panel
 3. **Preview the Contract**: Watch the contract update in real-time on the right panel
 4. **Generate PDF**: Click the "Generate PDF" button to create a printable document
+5. **Save or Load History**: In the Payment Calculator, export or import CSV files for draws and payments
 
 ## Required Fields
 
