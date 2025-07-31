@@ -81,6 +81,9 @@ const MONTHLY_RATE = ANNUAL_RATE / 12;
 const END_DATE = new Date(2027, 7, 1); // JS months are 0-based: 7 → August
 const PAYEES = ["Jake", "Parents", "Alex"];
 
+let drawsState = [];
+let paymentsState = [];
+
 // Calculator Helper Functions
 function firstOfNextMonth(from) {
   const year =
@@ -121,108 +124,151 @@ function monthlyPayment(principal, nMonths) {
 
 // Calculator UI Functions
 function initializeCalculator() {
-  const drawCountInput = document.getElementById("draw_count");
-  if (drawCountInput) {
-    drawCountInput.addEventListener("change", generateDrawInputs);
-    generateDrawInputs(); // Generate initial draw input
+  const addDrawBtn = document.getElementById("add_draw");
+  const addPaymentBtn = document.getElementById("add_payment");
+
+  if (addDrawBtn) {
+    addDrawBtn.addEventListener("click", () => {
+      drawsState.push({ amount: "", date: "", payee: PAYEES[0] });
+      renderDraws();
+    });
   }
-  const paymentCountInput = document.getElementById("payment_count");
-  if (paymentCountInput) {
-    paymentCountInput.addEventListener("change", generatePaymentInputs);
-    generatePaymentInputs();
+
+  if (addPaymentBtn) {
+    addPaymentBtn.addEventListener("click", () => {
+      paymentsState.push({ amount: "", date: "", payee: PAYEES[0] });
+      renderPayments();
+    });
   }
+
+  if (drawsState.length === 0) {
+    drawsState.push({ amount: "", date: "", payee: PAYEES[0] });
+  }
+
+  renderDraws();
+  renderPayments();
 }
 
-function generateDrawInputs() {
-  const drawCount = parseInt(document.getElementById("draw_count").value) || 1;
+function renderDraws() {
   const container = document.getElementById("draws-container");
-
   container.innerHTML = "";
+  const payeeOptions = PAYEES.map(
+    (p) => `<option value="${p}">${p}</option>`
+  ).join("");
 
-  for (let i = 1; i <= drawCount; i++) {
+  drawsState.forEach((draw, index) => {
     const drawGroup = document.createElement("div");
     drawGroup.className = "draw-input-group";
-    const payeeOptions = PAYEES.map(
-      (p) => `<option value="${p}">${p}</option>`
-    ).join("");
     drawGroup.innerHTML = `
-      <h4>Draw #${i}</h4>
+      <h4>Draw #${index + 1}</h4>
       <div class="draw-input-row">
         <div class="form-group">
-          <label for="draw_amount_${i}">Amount (USD)</label>
-          <input type="number" id="draw_amount_${i}" placeholder="5000" min="3000" step="100" required />
+          <label for="draw_amount_${index}">Amount (USD)</label>
+          <input type="number" id="draw_amount_${index}" placeholder="5000" min="3000" step="100" value="${draw.amount || ""}" />
         </div>
         <div class="form-group">
-          <label for="draw_date_${i}">Date</label>
-          <input type="date" id="draw_date_${i}" required />
+          <label for="draw_date_${index}">Date</label>
+          <input type="date" id="draw_date_${index}" value="${draw.date || ""}" />
         </div>
         <div class="form-group">
-          <label for="draw_payee_${i}">Payee</label>
-          <select id="draw_payee_${i}">${payeeOptions}</select>
+          <label for="draw_payee_${index}">Payee</label>
+          <select id="draw_payee_${index}">${payeeOptions}</select>
         </div>
+        <button type="button" class="delete-btn" data-index="${index}">Delete</button>
       </div>
     `;
     container.appendChild(drawGroup);
-  }
+
+    document.getElementById(`draw_payee_${index}`).value = draw.payee || PAYEES[0];
+    document
+      .getElementById(`draw_amount_${index}`)
+      .addEventListener("input", (e) => {
+        drawsState[index].amount = e.target.value;
+      });
+    document
+      .getElementById(`draw_date_${index}`)
+      .addEventListener("change", (e) => {
+        drawsState[index].date = e.target.value;
+      });
+    document
+      .getElementById(`draw_payee_${index}`)
+      .addEventListener("change", (e) => {
+        drawsState[index].payee = e.target.value;
+      });
+    drawGroup.querySelector(".delete-btn").addEventListener("click", () => {
+      drawsState.splice(index, 1);
+      renderDraws();
+    });
+  });
 }
 
-function generatePaymentInputs() {
-  const paymentCount =
-    parseInt(document.getElementById("payment_count").value) || 0;
+function renderPayments() {
   const container = document.getElementById("payments-container");
-
   container.innerHTML = "";
+  const payeeOptions = PAYEES.map(
+    (p) => `<option value="${p}">${p}</option>`
+  ).join("");
 
-  for (let i = 1; i <= paymentCount; i++) {
+  paymentsState.forEach((payment, index) => {
     const paymentGroup = document.createElement("div");
     paymentGroup.className = "draw-input-group";
-    const payeeOptions = PAYEES.map(
-      (p) => `<option value="${p}">${p}</option>`
-    ).join("");
     paymentGroup.innerHTML = `
-      <h4>Payment #${i}</h4>
+      <h4>Payment #${index + 1}</h4>
       <div class="draw-input-row">
         <div class="form-group">
-          <label for="payment_amount_${i}">Amount (USD)</label>
-          <input type="number" id="payment_amount_${i}" placeholder="500" step="0.01" min="0" required />
+          <label for="payment_amount_${index}">Amount (USD)</label>
+          <input type="number" id="payment_amount_${index}" placeholder="500" step="0.01" min="0" value="${payment.amount || ""}" />
         </div>
         <div class="form-group">
-          <label for="payment_date_${i}">Date</label>
-          <input type="date" id="payment_date_${i}" required />
+          <label for="payment_date_${index}">Date</label>
+          <input type="date" id="payment_date_${index}" value="${payment.date || ""}" />
         </div>
         <div class="form-group">
-          <label for="payment_payee_${i}">Payee</label>
-          <select id="payment_payee_${i}">${payeeOptions}</select>
+          <label for="payment_payee_${index}">Payee</label>
+          <select id="payment_payee_${index}">${payeeOptions}</select>
         </div>
+        <button type="button" class="delete-btn" data-index="${index}">Delete</button>
       </div>
     `;
     container.appendChild(paymentGroup);
-  }
+
+    document.getElementById(`payment_payee_${index}`).value = payment.payee || PAYEES[0];
+    document
+      .getElementById(`payment_amount_${index}`)
+      .addEventListener("input", (e) => {
+        paymentsState[index].amount = e.target.value;
+      });
+    document
+      .getElementById(`payment_date_${index}`)
+      .addEventListener("change", (e) => {
+        paymentsState[index].date = e.target.value;
+      });
+    document
+      .getElementById(`payment_payee_${index}`)
+      .addEventListener("change", (e) => {
+        paymentsState[index].payee = e.target.value;
+      });
+    paymentGroup.querySelector(".delete-btn").addEventListener("click", () => {
+      paymentsState.splice(index, 1);
+      renderPayments();
+    });
+  });
 }
 
 function exportCSV() {
-  const drawCount = parseInt(document.getElementById("draw_count").value) || 0;
-  const paymentCount =
-    parseInt(document.getElementById("payment_count").value) || 0;
   const rows = [["type", "amount", "date", "payee"]];
 
-  for (let i = 1; i <= drawCount; i++) {
-    const amount = document.getElementById(`draw_amount_${i}`)?.value;
-    const date = document.getElementById(`draw_date_${i}`)?.value;
-    const payee = document.getElementById(`draw_payee_${i}`)?.value;
-    if (amount && date) {
-      rows.push(["draw", amount, date, payee]);
+  drawsState.forEach((d) => {
+    if (d.amount && d.date) {
+      rows.push(["draw", d.amount, d.date, d.payee]);
     }
-  }
+  });
 
-  for (let i = 1; i <= paymentCount; i++) {
-    const amount = document.getElementById(`payment_amount_${i}`)?.value;
-    const date = document.getElementById(`payment_date_${i}`)?.value;
-    const payee = document.getElementById(`payment_payee_${i}`)?.value;
-    if (amount && date) {
-      rows.push(["payment", amount, date, payee]);
+  paymentsState.forEach((p) => {
+    if (p.amount && p.date) {
+      rows.push(["payment", p.amount, p.date, p.payee]);
     }
-  }
+  });
 
   if (rows.length === 1) {
     alert("No draws or payments to export.");
@@ -249,34 +295,24 @@ function importCSV(event) {
   reader.onload = function (e) {
     const text = e.target.result;
     const lines = text.trim().split(/\r?\n/).slice(1);
-    const draws = [];
-    const payments = [];
+    drawsState = [];
+    paymentsState = [];
 
     lines.forEach((line) => {
-      const [type, amountStr, date, payee] = line.split(",");
-      const amount = parseFloat(amountStr);
+      const [type, amount, date, payee] = line.split(",");
       if (type === "draw") {
-        draws.push({ amount, date, payee });
+        drawsState.push({ amount, date, payee });
       } else if (type === "payment") {
-        payments.push({ amount, date, payee });
+        paymentsState.push({ amount, date, payee });
       }
     });
 
-    document.getElementById("draw_count").value = draws.length;
-    generateDrawInputs();
-    draws.forEach((d, i) => {
-      document.getElementById(`draw_amount_${i + 1}`).value = d.amount;
-      document.getElementById(`draw_date_${i + 1}`).value = d.date;
-      document.getElementById(`draw_payee_${i + 1}`).value = d.payee;
-    });
+    if (drawsState.length === 0) {
+      drawsState.push({ amount: "", date: "", payee: PAYEES[0] });
+    }
 
-    document.getElementById("payment_count").value = payments.length;
-    generatePaymentInputs();
-    payments.forEach((p, i) => {
-      document.getElementById(`payment_amount_${i + 1}`).value = p.amount;
-      document.getElementById(`payment_date_${i + 1}`).value = p.date;
-      document.getElementById(`payment_payee_${i + 1}`).value = p.payee;
-    });
+    renderDraws();
+    renderPayments();
   };
 
   reader.readAsText(file);
@@ -284,43 +320,26 @@ function importCSV(event) {
 }
 
 function calculatePayments() {
-  const drawCount = parseInt(document.getElementById("draw_count").value) || 1;
-  const draws = [];
-
-  // Collect draw data
-  for (let i = 1; i <= drawCount; i++) {
-    const amountInput = document.getElementById(`draw_amount_${i}`);
-    const dateInput = document.getElementById(`draw_date_${i}`);
-    const payeeInput = document.getElementById(`draw_payee_${i}`);
-
-    if (amountInput && dateInput && amountInput.value && dateInput.value) {
-      const amount = parseFloat(amountInput.value);
-      const date = new Date(dateInput.value);
-      const payee = payeeInput?.value || PAYEES[0];
-      draws.push({ amount, date, payee });
-    }
-  }
+  const draws = drawsState
+    .filter((d) => d.amount && d.date)
+    .map((d) => ({
+      amount: parseFloat(d.amount),
+      date: new Date(d.date),
+      payee: d.payee,
+    }));
 
   if (draws.length === 0) {
     alert("Please enter at least one draw with amount and date.");
     return;
   }
 
-  const paymentCount =
-    parseInt(document.getElementById("payment_count").value) || 0;
-  const payments = [];
-
-  for (let i = 1; i <= paymentCount; i++) {
-    const amountInput = document.getElementById(`payment_amount_${i}`);
-    const dateInput = document.getElementById(`payment_date_${i}`);
-    const payeeInput = document.getElementById(`payment_payee_${i}`);
-    if (amountInput && dateInput && amountInput.value && dateInput.value) {
-      const amount = parseFloat(amountInput.value);
-      const date = new Date(dateInput.value);
-      const payee = payeeInput?.value || PAYEES[0];
-      payments.push({ amount, date, payee });
-    }
-  }
+  const payments = paymentsState
+    .filter((p) => p.amount && p.date)
+    .map((p) => ({
+      amount: parseFloat(p.amount),
+      date: new Date(p.date),
+      payee: p.payee,
+    }));
 
   // Calculate next due date
   const today = new Date();

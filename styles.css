@@ -403,13 +403,43 @@ body {
 
 .draw-input-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr auto;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
 }
 
 .draw-input-row:last-child {
     margin-bottom: 0;
+}
+
+.add-btn {
+    width: 100%;
+    background: transparent;
+    color: #3b82f6;
+    border: 2px dashed #3b82f6;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.add-btn:hover {
+    background: #f0f9ff;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-weight: 600;
+    align-self: end;
+}
+
+.delete-btn:hover {
+    text-decoration: underline;
 }
 
 /* Outline Button Style */
