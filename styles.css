@@ -569,20 +569,26 @@ body {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-    
-    .form-section {
+
+    /* Reorder sections on the payment calculator tab for mobile */
+    #calculator-tab {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #calculator-tab .form-section {
         position: static;
         order: 2;
     }
-    
-    .contract-section {
+
+    #calculator-tab .contract-section {
         order: 1;
     }
-    
+
     .tab-navigation {
         flex-direction: column;
     }
-    
+
     .tab-button {
         flex: none;
     }
