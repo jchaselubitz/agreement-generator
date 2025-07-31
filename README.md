@@ -17,6 +17,7 @@ agreement-generator/
 ## Features
 
 - **Real-time Preview**: Form fields update the contract display instantly
+- **GBP Conversion**: Credit limit shown in USD with real-time GBP equivalent for informational purposes
 - **Responsive Design**: Works on desktop and mobile devices
 - **PDF Export**: Generate professional PDF documents using browser print functionality
 - **Form Validation**: Ensures required fields are completed before PDF generation
