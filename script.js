@@ -79,6 +79,7 @@ Object.keys(fieldMappings).forEach((fieldId) => {
 const ANNUAL_RATE = 0.07; // 7% per annum
 const MONTHLY_RATE = ANNUAL_RATE / 12;
 const END_DATE = new Date(2027, 7, 1); // JS months are 0-based: 7 → August
+const PAYEES = ["Jake", "Parents", "Alex"];
 
 // Calculator Helper Functions
 function firstOfNextMonth(from) {
@@ -138,6 +139,9 @@ function generateDrawInputs() {
   for (let i = 1; i <= drawCount; i++) {
     const drawGroup = document.createElement("div");
     drawGroup.className = "draw-input-group";
+    const payeeOptions = PAYEES.map(
+      (p) => `<option value="${p}">${p}</option>`
+    ).join("");
     drawGroup.innerHTML = `
       <h4>Draw #${i}</h4>
       <div class="draw-input-row">
@@ -148,6 +152,10 @@ function generateDrawInputs() {
         <div class="form-group">
           <label for="draw_date_${i}">Date</label>
           <input type="date" id="draw_date_${i}" required />
+        </div>
+        <div class="form-group">
+          <label for="draw_payee_${i}">Payee</label>
+          <select id="draw_payee_${i}">${payeeOptions}</select>
         </div>
       </div>
     `;
@@ -164,6 +172,9 @@ function generatePaymentInputs() {
   for (let i = 1; i <= paymentCount; i++) {
     const paymentGroup = document.createElement("div");
     paymentGroup.className = "draw-input-group";
+    const payeeOptions = PAYEES.map(
+      (p) => `<option value="${p}">${p}</option>`
+    ).join("");
     paymentGroup.innerHTML = `
       <h4>Payment #${i}</h4>
       <div class="draw-input-row">
@@ -174,6 +185,10 @@ function generatePaymentInputs() {
         <div class="form-group">
           <label for="payment_date_${i}">Date</label>
           <input type="date" id="payment_date_${i}" required />
+        </div>
+        <div class="form-group">
+          <label for="payment_payee_${i}">Payee</label>
+          <select id="payment_payee_${i}">${payeeOptions}</select>
         </div>
       </div>
     `;
@@ -186,21 +201,23 @@ function exportCSV() {
   const paymentCount = parseInt(
     document.getElementById("payment_count").value
   ) || 0;
-  const rows = [["type", "amount", "date"]];
+  const rows = [["type", "amount", "date", "payee"]];
 
   for (let i = 1; i <= drawCount; i++) {
     const amount = document.getElementById(`draw_amount_${i}`)?.value;
     const date = document.getElementById(`draw_date_${i}`)?.value;
+    const payee = document.getElementById(`draw_payee_${i}`)?.value;
     if (amount && date) {
-      rows.push(["draw", amount, date]);
+      rows.push(["draw", amount, date, payee]);
     }
   }
 
   for (let i = 1; i <= paymentCount; i++) {
     const amount = document.getElementById(`payment_amount_${i}`)?.value;
     const date = document.getElementById(`payment_date_${i}`)?.value;
+    const payee = document.getElementById(`payment_payee_${i}`)?.value;
     if (amount && date) {
-      rows.push(["payment", amount, date]);
+      rows.push(["payment", amount, date, payee]);
     }
   }
 
@@ -233,12 +250,12 @@ function importCSV(event) {
     const payments = [];
 
     lines.forEach((line) => {
-      const [type, amountStr, date] = line.split(",");
+      const [type, amountStr, date, payee] = line.split(",");
       const amount = parseFloat(amountStr);
       if (type === "draw") {
-        draws.push({ amount, date });
+        draws.push({ amount, date, payee });
       } else if (type === "payment") {
-        payments.push({ amount, date });
+        payments.push({ amount, date, payee });
       }
     });
 
@@ -247,6 +264,7 @@ function importCSV(event) {
     draws.forEach((d, i) => {
       document.getElementById(`draw_amount_${i + 1}`).value = d.amount;
       document.getElementById(`draw_date_${i + 1}`).value = d.date;
+      document.getElementById(`draw_payee_${i + 1}`).value = d.payee;
     });
 
     document.getElementById("payment_count").value = payments.length;
@@ -254,6 +272,7 @@ function importCSV(event) {
     payments.forEach((p, i) => {
       document.getElementById(`payment_amount_${i + 1}`).value = p.amount;
       document.getElementById(`payment_date_${i + 1}`).value = p.date;
+      document.getElementById(`payment_payee_${i + 1}`).value = p.payee;
     });
   };
 
@@ -269,11 +288,13 @@ function calculatePayments() {
   for (let i = 1; i <= drawCount; i++) {
     const amountInput = document.getElementById(`draw_amount_${i}`);
     const dateInput = document.getElementById(`draw_date_${i}`);
+    const payeeInput = document.getElementById(`draw_payee_${i}`);
 
     if (amountInput && dateInput && amountInput.value && dateInput.value) {
       const amount = parseFloat(amountInput.value);
       const date = new Date(dateInput.value);
-      draws.push({ amount, date });
+      const payee = payeeInput?.value || PAYEES[0];
+      draws.push({ amount, date, payee });
     }
   }
 
@@ -288,10 +309,12 @@ function calculatePayments() {
   for (let i = 1; i <= paymentCount; i++) {
     const amountInput = document.getElementById(`payment_amount_${i}`);
     const dateInput = document.getElementById(`payment_date_${i}`);
+    const payeeInput = document.getElementById(`payment_payee_${i}`);
     if (amountInput && dateInput && amountInput.value && dateInput.value) {
       const amount = parseFloat(amountInput.value);
       const date = new Date(dateInput.value);
-      payments.push({ amount, date });
+      const payee = payeeInput?.value || PAYEES[0];
+      payments.push({ amount, date, payee });
     }
   }
 
@@ -301,12 +324,13 @@ function calculatePayments() {
 
   // Build draw breakdown
   const drawBreakdowns = [];
-  for (const { amount, date } of draws) {
+  for (const { amount, date, payee } of draws) {
     const firstPay = firstOfNextMonth(date);
     if (nextDue < firstPay) {
       drawBreakdowns.push({
         amount,
         date,
+        payee,
         firstPayment: firstPay,
         monthlyPayment: 0,
         status: "Not yet due",
@@ -318,6 +342,7 @@ function calculatePayments() {
     drawBreakdowns.push({
       amount,
       date,
+      payee,
       firstPayment: firstPay,
       monthlyPayment: pmt,
       status: "Active",
@@ -330,6 +355,14 @@ function calculatePayments() {
     ...payments.map((p) => ({ type: "payment", ...p })),
   ].sort((a, b) => a.date - b.date);
 
+  const payeeTotals = {};
+  PAYEES.forEach((p) => (payeeTotals[p] = { balance: 0, interestDue: 0 }));
+  events.forEach((e) => {
+    if (!payeeTotals[e.payee]) {
+      payeeTotals[e.payee] = { balance: 0, interestDue: 0 };
+    }
+  });
+
   let balance = 0;
   let interestDue = 0;
   const paymentBreakdowns = [];
@@ -338,42 +371,64 @@ function calculatePayments() {
   for (const ev of events) {
     const monthsPassed = monthsDiff(lastDate, ev.date);
     if (monthsPassed > 0) {
-      const interestAccrued =
-        balance * (Math.pow(1 + MONTHLY_RATE, monthsPassed) - 1);
-      interestDue += interestAccrued;
+      for (const p in payeeTotals) {
+        const interestAccrued =
+          payeeTotals[p].balance * (Math.pow(1 + MONTHLY_RATE, monthsPassed) - 1);
+        payeeTotals[p].interestDue += interestAccrued;
+        interestDue += interestAccrued;
+      }
       lastDate = addMonths(lastDate, monthsPassed);
     }
 
     if (ev.type === "draw") {
       balance += ev.amount;
+      payeeTotals[ev.payee].balance += ev.amount;
     } else {
       let remaining = ev.amount;
-      const interestPaid = Math.min(interestDue, remaining);
+      const payeeData = payeeTotals[ev.payee];
+      const interestPaid = Math.min(payeeData.interestDue, remaining);
+      payeeData.interestDue -= interestPaid;
       interestDue -= interestPaid;
       remaining -= interestPaid;
-      const principalPaid = Math.min(balance, remaining);
+      const principalPaid = Math.min(payeeData.balance, remaining);
+      payeeData.balance -= principalPaid;
       balance -= principalPaid;
       paymentBreakdowns.push({
         amount: ev.amount,
         date: ev.date,
         interestPaid,
         principalPaid,
+        payee: ev.payee,
       });
     }
   }
 
   const monthsToToday = monthsDiff(lastDate, today);
   if (monthsToToday > 0) {
-    const interestAccrued =
-      balance * (Math.pow(1 + MONTHLY_RATE, monthsToToday) - 1);
-    interestDue += interestAccrued;
+    for (const p in payeeTotals) {
+      const interestAccrued =
+        payeeTotals[p].balance * (Math.pow(1 + MONTHLY_RATE, monthsToToday) - 1);
+      payeeTotals[p].interestDue += interestAccrued;
+      interestDue += interestAccrued;
+    }
     lastDate = addMonths(lastDate, monthsToToday);
+  }
+
+  const payeeBalances = {};
+  for (const p in payeeTotals) {
+    payeeBalances[p] = payeeTotals[p].balance + payeeTotals[p].interestDue;
   }
 
   const currentBalance = balance + interestDue;
 
   // Update UI
-  updateCalculatorDisplay(nextDue, currentBalance, drawBreakdowns, paymentBreakdowns);
+  updateCalculatorDisplay(
+    nextDue,
+    currentBalance,
+    drawBreakdowns,
+    paymentBreakdowns,
+    payeeBalances
+  );
 
   // Show success message
   const message = document.getElementById("calculatorMessage");
@@ -386,7 +441,8 @@ function updateCalculatorDisplay(
   nextDue,
   currentBalance,
   drawBreakdowns,
-  paymentBreakdowns
+  paymentBreakdowns,
+  payeeBalances
 ) {
   // Update summary section
   document.getElementById("nextDueDate").textContent = nextDue
@@ -395,6 +451,13 @@ function updateCalculatorDisplay(
   document.getElementById("currentBalance").textContent = `$${currentBalance.toFixed(
     2
   )}`;
+  const payeeContainer = document.getElementById("payeeSummary");
+  payeeContainer.innerHTML = "";
+  Object.entries(payeeBalances).forEach(([p, amt]) => {
+    const line = document.createElement("p");
+    line.textContent = `${p}: $${amt.toFixed(2)}`;
+    payeeContainer.appendChild(line);
+  });
 
   // Update draw breakdown
   const breakdownContainer = document.getElementById("drawsBreakdown");
@@ -413,6 +476,10 @@ function updateCalculatorDisplay(
         <div class="draw-detail">
           <strong>Draw Date:</strong>
           <span>${draw.date.toISOString().slice(0, 10)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Payee:</strong>
+          <span>${draw.payee}</span>
         </div>
         <div class="draw-detail">
           <strong>First Payment:</strong>
@@ -448,6 +515,10 @@ function updateCalculatorDisplay(
         <div class="draw-detail">
           <strong>Date:</strong>
           <span>${pay.date.toISOString().slice(0, 10)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Payee:</strong>
+          <span>${pay.payee}</span>
         </div>
         <div class="draw-detail">
           <strong>Interest Paid:</strong>

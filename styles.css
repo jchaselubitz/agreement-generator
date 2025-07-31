@@ -75,6 +75,10 @@ body {
     display: grid;
 }
 
+#calculator-tab {
+    grid-template-columns: 500px 1fr;
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -399,7 +403,7 @@ body {
 
 .draw-input-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
 }
@@ -444,6 +448,10 @@ body {
     font-weight: 800;
     color: #059669;
     margin: 0;
+}
+
+.payee-summary p {
+    margin: 0.25rem 0;
 }
 
 .draws-breakdown {
