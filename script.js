@@ -1,7 +1,4 @@
-// Set today's date as default
-const today = new Date().toISOString().split("T")[0];
-document.getElementById("lender_date").value = today;
-document.getElementById("borrower_date").value = today;
+// Date fields will be blank by default - users must select dates
 
 // Form field mappings
 const fieldMappings = {
@@ -25,9 +22,14 @@ function updateContractDisplay(fieldId, value) {
       const element = document.getElementById(displayId);
       if (element) {
         if (value.trim() === "") {
-          element.textContent = `[${fieldId
-            .replace("_", " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase())}]`;
+          // For date and email fields, show blank space for writing in
+          if (fieldId.includes("date") || fieldId.includes("email")) {
+            element.innerHTML = '<span class="blank-field"></span>';
+          } else {
+            element.textContent = `[${fieldId
+              .replace("_", " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase())}]`;
+          }
         } else {
           if (fieldId === "credit_limit") {
             element.textContent = parseInt(value).toLocaleString();
@@ -139,6 +141,13 @@ function exportToPDF() {
                 li {
                     margin-bottom: 6px;
                 }
+
+                .field {
+                    margin-bottom: 10px;
+                    margin-top: 10px;
+                    display: block;
+                    align-items: center;
+                }
                 
                 .field-highlight {
                     background: #f8f9fa;
@@ -147,7 +156,8 @@ function exportToPDF() {
                     border-radius: 3px;
                     font-weight: bold;
                     display: inline-block;
-                    min-width: 80px;
+                    min-width: 220px;
+                    min-height: 1.5rem;
                     text-align: center;
                 }
                 
@@ -161,9 +171,8 @@ function exportToPDF() {
                 
                 .signature-section {
                     background: #fafafa;
-                    padding: 20px;
                     border: 1px solid #ddd;
-                    margin-top: 30px;
+                    margin-top: 20px;
                     page-break-inside: avoid;
                 }
                 
@@ -173,10 +182,18 @@ function exportToPDF() {
                 
                 .signature-line {
                     border-bottom: 1px solid black;
-                    width: 250px;
-                    height: 16px;
+                    width: 350px;
+                    height: 2.5rem;
+                    display: block;
+                    margin: 10px 0 0 0;
+                }
+                
+                .blank-field {
+                    border-bottom: 1px solid black;
+                    width: 200px;
+                    height: 5rem;
                     display: inline-block;
-                    margin: 0 5px;
+                    margin: 0 0.25rem;
                 }
                 
                 .footer-text {

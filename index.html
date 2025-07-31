@@ -1,200 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Line of Credit Agreement Generator</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div class="container">
-        <aside class="form-section">
-            <h2 class="form-title">Agreement Details</h2>
-            
-            <form id="agreementForm">
-                <fieldset>
-                    <legend style="display: none;">Lender Information</legend>
-                    
-                    <div class="form-group">
-                        <label for="lender_name">Lender Full Name</label>
-                        <input type="text" id="lender_name" placeholder="Enter lender's full name" required>
-                    </div>
+      <aside class="form-section">
+        <h2 class="form-title">Agreement Details</h2>
 
-                    <div class="form-group">
-                        <label for="lender_address">Lender Address</label>
-                        <textarea id="lender_address" placeholder="Enter lender's complete address" required></textarea>
-                    </div>
+        <form id="agreementForm" class="form-container">
+          <fieldset class="form-set">
+            <legend style="display: none">Lender Information</legend>
 
-                    <div class="form-group">
-                        <label for="lender_email">Lender Email</label>
-                        <input type="email" id="lender_email" placeholder="lender@example.com" required>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend style="display: none;">Borrower Information</legend>
-                    
-                    <div class="form-group">
-                        <label for="borrower_name">Borrower Full Name</label>
-                        <input type="text" id="borrower_name" placeholder="Enter borrower's full name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="borrower_business">Borrower Business Name (Optional)</label>
-                        <input type="text" id="borrower_business" placeholder="Enter business name if applicable">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="borrower_address">Borrower Address</label>
-                        <textarea id="borrower_address" placeholder="Enter borrower's complete address" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="borrower_email">Borrower Email</label>
-                        <input type="email" id="borrower_email" placeholder="borrower@example.com" required>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend style="display: none;">Agreement Terms</legend>
-                    
-                    <div class="form-group">
-                        <label for="credit_limit">Credit Limit (USD)</label>
-                        <input type="number" id="credit_limit" placeholder="50000" min="3000" step="1000" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="lender_date">Lender Signature Date</label>
-                        <input type="date" id="lender_date" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="borrower_date">Borrower Signature Date</label>
-                        <input type="date" id="borrower_date" required>
-                    </div>
-                </fieldset>
-
-                <button type="button" class="export-btn" onclick="exportToPDF()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
-                    </svg>
-                    Generate PDF
-                </button>
-                
-                <div class="success-message" id="successMessage">
-                    PDF exported successfully!
-                </div>
-            </form>
-        </aside>
-
-        <main class="contract-section">
-            <h1 class="contract-title">Line of Credit Agreement</h1>
-            
-            <div class="contract-content" id="contractContent">
-                <p>This Line of Credit Agreement ("Agreement") is made effective as of August 1, 2025, by and between:</p>
-                
-                <p><strong>Lender:</strong> <span class="field-highlight" id="display_lender_name">[Lender Name]</span><br>
-                <strong>Address:</strong> <span class="field-highlight" id="display_lender_address">[Lender Address]</span></p>
-
-                <p><strong>Borrower:</strong> <span class="field-highlight" id="display_borrower_name">[Borrower Name]</span><br>
-                <strong>Business Name (if any):</strong> <span class="field-highlight" id="display_borrower_business">[Business Name]</span><br>
-                <strong>Address:</strong> <span class="field-highlight" id="display_borrower_address">[Borrower Address]</span></p>
-
-                <hr class="section-divider">
-
-                <h3>1. Credit Limit</h3>
-                <p>Lender agrees to provide Borrower with a revolving line of credit of up to $<span class="field-highlight" id="display_credit_limit">[Amount]</span> USD ("Credit Limit"). Funds may be drawn in amounts of at least $3,000, upon written request from Borrower to Lender.</p>
-
-                <hr class="section-divider">
-
-                <h3>2. Interest</h3>
-                <p>Interest shall accrue on any drawn funds at an annual interest rate of 7%, compounded monthly, beginning on the date the funds are disbursed. No interest will accrue on undrawn funds.</p>
-
-                <hr class="section-divider">
-
-                <h3>3. Repayment Terms</h3>
-                <ul>
-                    <li>Borrower shall begin repaying each draw on the first day of the month following the disbursement.</li>
-                    <li>Payments shall be made monthly, with equal payments including principal and accrued interest.</li>
-                    <li>Borrower may prepay any amount at any time without penalty.</li>
-                </ul>
-
-                <hr class="section-divider">
-
-                <h3>4. Term</h3>
-                <p>This Agreement will remain in effect for two years, ending on August 1, 2027, unless extended or terminated earlier in writing by mutual agreement.</p>
-
-                <hr class="section-divider">
-
-                <h3>5. Draw Method</h3>
-                <p>Borrower may request disbursements via written message (email, text, or letter). Lender has no obligation to fund a draw that exceeds the unused portion of the Credit Limit.</p>
-
-                <hr class="section-divider">
-
-                <h3>6. Security</h3>
-                <p>This loan is unsecured. Borrower is not required to pledge collateral.</p>
-
-                <hr class="section-divider">
-
-                <h3>7. Use of Funds</h3>
-                <p>There are no restrictions on how the Borrower uses funds drawn from this credit line.</p>
-
-                <hr class="section-divider">
-
-                <h3>8. Defaults and Enforcement</h3>
-                <p>There are no penalties for late payment or default. This agreement is based on mutual trust and cooperation. However, either party may terminate the availability of future credit at any time with written notice.</p>
-
-                <hr class="section-divider">
-
-                <h3>9. Governing Law</h3>
-                <p>This Agreement shall be governed under the laws of the United States, and any disputes shall be resolved under the jurisdiction of the state in which the Lender resides.</p>
-
-                <hr class="section-divider">
-
-                <h3>10. Entire Agreement</h3>
-                <p>This document represents the entire understanding between the parties and supersedes all prior discussions or agreements, whether written or oral.</p>
-
-                <hr class="section-divider">
-
-                <h3>11. Transfer Fees</h3>
-                <p>All costs or fees associated with transferring or wiring funds to the Borrower, including bank or platform fees, shall be the sole responsibility of the Borrower and may be added to the outstanding balance at Lender's discretion.</p>
-
-                <hr class="section-divider">
-
-                <div class="signature-section">
-                    <h3>Signatures</h3>
-                    
-                    <div class="signature-block">
-                        <p><strong>Lender</strong></p>
-                        <p>Name: <span class="field-highlight" id="display_lender_name_sig">[Lender Name]</span><br>
-                        Email: <span class="field-highlight" id="display_lender_email">[Lender Email]</span><br>
-                        Signature: <span class="signature-line"></span><br>
-                        Date: <span class="field-highlight" id="display_lender_date">[Date]</span></p>
-                    </div>
-
-                    <div class="signature-block">
-                        <p><strong>Borrower</strong></p>
-                        <p>Name: <span class="field-highlight" id="display_borrower_name_sig">[Borrower Name]</span><br>
-                        Email: <span class="field-highlight" id="display_borrower_email">[Borrower Email]</span><br>
-                        Signature: <span class="signature-line"></span><br>
-                        Date: <span class="field-highlight" id="display_borrower_date">[Date]</span></p>
-                    </div>
-                </div>
-
-                <p style="text-align: center; font-style: italic; margin-top: 30px; color: #6b7280;">
-                    This agreement is governed under U.S. law and intended as a simple private arrangement.
-                </p>
+            <div class="form-group">
+              <label for="lender_name">Lender Full Name</label>
+              <input
+                type="text"
+                id="lender_name"
+                placeholder="Enter lender's full name"
+                required
+              />
             </div>
-        </main>
+
+            <div class="form-group">
+              <label for="lender_address">Lender Address</label>
+              <textarea
+                id="lender_address"
+                placeholder="Enter lender's complete address"
+                required
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="lender_email">Lender Email (Optional)</label>
+              <input type="email" id="lender_email" placeholder="write in" />
+            </div>
+          </fieldset>
+
+          <fieldset class="form-set">
+            <legend style="display: none">Borrower Information</legend>
+
+            <div class="form-group">
+              <label for="borrower_name">Borrower Full Name</label>
+              <input
+                type="text"
+                id="borrower_name"
+                placeholder="Enter borrower's full name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="borrower_business"
+                >Borrower Business Name (Optional)</label
+              >
+              <input
+                type="text"
+                id="borrower_business"
+                placeholder="Enter business name if applicable"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="borrower_address">Borrower Address</label>
+              <textarea
+                id="borrower_address"
+                placeholder="Enter borrower's complete address"
+                required
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="borrower_email">Borrower Email (Optional)</label>
+              <input type="email" id="borrower_email" placeholder="write in" />
+            </div>
+          </fieldset>
+
+          <fieldset class="form-set">
+            <legend style="display: none">Agreement Terms</legend>
+
+            <div class="form-group">
+              <label for="credit_limit">Credit Limit (USD)</label>
+              <input
+                type="number"
+                id="credit_limit"
+                placeholder="50000"
+                min="3000"
+                step="1000"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="lender_date">Lender Signature Date (Optional)</label>
+              <input type="date" id="lender_date" placeholder="write in" />
+            </div>
+
+            <div class="form-group">
+              <label for="borrower_date"
+                >Borrower Signature Date (Optional)</label
+              >
+              <input type="date" id="borrower_date" placeholder="write in" />
+            </div>
+          </fieldset>
+
+          <button type="button" class="export-btn" onclick="exportToPDF()">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="margin-right: 8px"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
+              <polyline points="14,2 14,8 20,8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10,9 9,9 8,9"></polyline>
+            </svg>
+            Generate PDF
+          </button>
+
+          <div class="success-message" id="successMessage">
+            PDF exported successfully!
+          </div>
+        </form>
+      </aside>
+
+      <main class="contract-section">
+        <h1 class="contract-title">Line of Credit Agreement</h1>
+
+        <div class="contract-content" id="contractContent">
+          <p>
+            This Line of Credit Agreement ("Agreement") is made effective as of
+            August 1, 2025, by and between:
+          </p>
+
+          <p>
+            <strong>Lender:</strong>
+            <span class="field-highlight" id="display_lender_name"
+              >[Lender Name]</span
+            ><br />
+            <strong>Address:</strong>
+            <span class="field-highlight" id="display_lender_address"
+              >[Lender Address]</span
+            >
+          </p>
+
+          <p>
+            <strong>Borrower:</strong>
+            <span class="field-highlight" id="display_borrower_name"
+              >[Borrower Name]</span
+            ><br />
+            <strong>Business Name (if any):</strong>
+            <span class="field-highlight" id="display_borrower_business"
+              >[Business Name]</span
+            ><br />
+            <strong>Address:</strong>
+            <span class="field-highlight" id="display_borrower_address"
+              >[Borrower Address]</span
+            >
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>1. Credit Limit</h3>
+          <p>
+            Lender agrees to provide Borrower with a revolving line of credit of
+            up to $<span class="field-highlight" id="display_credit_limit"
+              >[Amount]</span
+            >
+            USD ("Credit Limit"). Funds may be drawn in amounts of at least
+            $3,000, upon written request from Borrower to Lender.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>2. Interest</h3>
+          <p>
+            Interest shall accrue on any drawn funds at an annual interest rate
+            of 7%, compounded monthly, beginning on the date the funds are
+            disbursed. No interest will accrue on undrawn funds.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>3. Repayment Terms</h3>
+          <ul>
+            <li>
+              Borrower shall begin repaying each draw on the first day of the
+              month following the disbursement.
+            </li>
+            <li>
+              Payments shall be made monthly, with equal payments including
+              principal and accrued interest.
+            </li>
+            <li>Borrower may prepay any amount at any time without penalty.</li>
+          </ul>
+
+          <hr class="section-divider" />
+
+          <h3>4. Term</h3>
+          <p>
+            This Agreement will remain in effect for two years, ending on August
+            1, 2027, unless extended or terminated earlier in writing by mutual
+            agreement.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>5. Draw Method</h3>
+          <p>
+            Borrower may request disbursements via written message (email, text,
+            or letter). Lender has no obligation to fund a draw that exceeds the
+            unused portion of the Credit Limit.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>6. Security</h3>
+          <p>
+            This loan is unsecured. Borrower is not required to pledge
+            collateral.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>7. Use of Funds</h3>
+          <p>
+            There are no restrictions on how the Borrower uses funds drawn from
+            this credit line.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>8. Defaults and Enforcement</h3>
+          <p>
+            There are no penalties for late payment or default. This agreement
+            is based on mutual trust and cooperation. However, either party may
+            terminate the availability of future credit at any time with written
+            notice.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>9. Governing Law</h3>
+          <p>
+            This Agreement shall be governed under the laws of the United
+            States, and any disputes shall be resolved under the jurisdiction of
+            the state in which the Lender resides.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>10. Entire Agreement</h3>
+          <p>
+            This document represents the entire understanding between the
+            parties and supersedes all prior discussions or agreements, whether
+            written or oral.
+          </p>
+
+          <hr class="section-divider" />
+
+          <h3>11. Transfer Fees</h3>
+          <p>
+            All costs or fees associated with transferring or wiring funds to
+            the Borrower, including bank or platform fees, shall be the sole
+            responsibility of the Borrower and may be added to the outstanding
+            balance at Lender's discretion.
+          </p>
+
+          <hr class="section-divider" />
+
+          <div class="signature-section">
+            <h3>Signatures</h3>
+
+            <div class="signature-block">
+              <p><strong>Lender</strong></p>
+              <p>
+                Name:
+                <span class="field-highlight" id="display_lender_name_sig"
+                  >[Lender Name]</span
+                ><br />
+              </p>
+              <p>
+                Email:
+                <span class="field-highlight" id="display_lender_email"></span
+                ><br />
+              </p>
+              <p>Signature: <span class="signature-line"></span><br /></p>
+              <p>
+                Date:
+                <span class="field-highlight" id="display_lender_date"></span>
+              </p>
+            </div>
+
+            <div class="signature-block">
+              <p><strong>Borrower</strong></p>
+              <p>
+                Name:
+                <span class="field-highlight" id="display_borrower_name_sig"
+                  >[Borrower Name]</span
+                ><br />
+              </p>
+              <p>
+                Email:
+                <span class="field-highlight" id="display_borrower_email"></span
+                ><br />
+              </p>
+              <p>Signature: <span class="signature-line"></span><br /></p>
+              <p>
+                Date:
+                <span class="field-highlight" id="display_borrower_date"></span>
+              </p>
+            </div>
+          </div>
+
+          <p
+            style="
+              text-align: center;
+              font-style: italic;
+              margin-top: 30px;
+              color: #6b7280;
+            "
+          >
+            This agreement is governed under U.S. law and intended as a simple
+            private arrangement.
+          </p>
+        </div>
+      </main>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
