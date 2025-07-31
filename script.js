@@ -14,6 +14,26 @@ const fieldMappings = {
   borrower_date: ["display_borrower_date"],
 };
 
+// Tab Navigation
+function initializeTabs() {
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetTab = button.getAttribute("data-tab");
+
+      // Remove active class from all buttons and contents
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      tabContents.forEach((content) => content.classList.remove("active"));
+
+      // Add active class to clicked button and corresponding content
+      button.classList.add("active");
+      document.getElementById(`${targetTab}-tab`).classList.add("active");
+    });
+  });
+}
+
 // Update contract display when form fields change
 function updateContractDisplay(fieldId, value) {
   const displayIds = fieldMappings[fieldId];
@@ -54,6 +74,182 @@ Object.keys(fieldMappings).forEach((fieldId) => {
     });
   }
 });
+
+// Calculator Configuration
+const ANNUAL_RATE = 0.07; // 7% per annum
+const MONTHLY_RATE = ANNUAL_RATE / 12;
+const END_DATE = new Date(2027, 7, 1); // JS months are 0-based: 7 → August
+
+// Calculator Helper Functions
+function firstOfNextMonth(from) {
+  const year =
+    from.getMonth() === 11 ? from.getFullYear() + 1 : from.getFullYear();
+  const month = (from.getMonth() + 1) % 12;
+  return new Date(year, month, 1);
+}
+
+function monthsBetween(from, to) {
+  return (
+    (to.getFullYear() - from.getFullYear()) * 12 +
+    (to.getMonth() - from.getMonth()) +
+    1 // include the month of "to" as a payment
+  );
+}
+
+function monthlyPayment(principal, nMonths) {
+  const r = MONTHLY_RATE;
+  // standard amortization formula: P * [r (1+r)^N] / [(1+r)^N – 1]
+  return (
+    (principal * (r * Math.pow(1 + r, nMonths))) /
+    (Math.pow(1 + r, nMonths) - 1)
+  );
+}
+
+// Calculator UI Functions
+function initializeCalculator() {
+  const drawCountInput = document.getElementById("draw_count");
+  if (drawCountInput) {
+    drawCountInput.addEventListener("change", generateDrawInputs);
+    generateDrawInputs(); // Generate initial draw input
+  }
+}
+
+function generateDrawInputs() {
+  const drawCount = parseInt(document.getElementById("draw_count").value) || 1;
+  const container = document.getElementById("draws-container");
+
+  container.innerHTML = "";
+
+  for (let i = 1; i <= drawCount; i++) {
+    const drawGroup = document.createElement("div");
+    drawGroup.className = "draw-input-group";
+    drawGroup.innerHTML = `
+      <h4>Draw #${i}</h4>
+      <div class="draw-input-row">
+        <div class="form-group">
+          <label for="draw_amount_${i}">Amount (USD)</label>
+          <input type="number" id="draw_amount_${i}" placeholder="5000" min="3000" step="100" required />
+        </div>
+        <div class="form-group">
+          <label for="draw_date_${i}">Date</label>
+          <input type="date" id="draw_date_${i}" required />
+        </div>
+      </div>
+    `;
+    container.appendChild(drawGroup);
+  }
+}
+
+function calculatePayments() {
+  const drawCount = parseInt(document.getElementById("draw_count").value) || 1;
+  const draws = [];
+
+  // Collect draw data
+  for (let i = 1; i <= drawCount; i++) {
+    const amountInput = document.getElementById(`draw_amount_${i}`);
+    const dateInput = document.getElementById(`draw_date_${i}`);
+
+    if (amountInput && dateInput && amountInput.value && dateInput.value) {
+      const amount = parseFloat(amountInput.value);
+      const date = new Date(dateInput.value);
+      draws.push({ amount, date });
+    }
+  }
+
+  if (draws.length === 0) {
+    alert("Please enter at least one draw with amount and date.");
+    return;
+  }
+
+  // Calculate next due date
+  const today = new Date();
+  const nextDue = firstOfNextMonth(today);
+
+  // Calculate total payment
+  let totalDue = 0;
+  const drawBreakdowns = [];
+
+  for (const { amount, date } of draws) {
+    const firstPay = firstOfNextMonth(date);
+    if (nextDue < firstPay) {
+      // repayment hasn't started yet
+      drawBreakdowns.push({
+        amount,
+        date,
+        firstPayment: firstPay,
+        monthlyPayment: 0,
+        status: "Not yet due",
+      });
+      continue;
+    }
+
+    const nRem = monthsBetween(nextDue, END_DATE);
+    const pmt = monthlyPayment(amount, nRem);
+    totalDue += pmt;
+
+    drawBreakdowns.push({
+      amount,
+      date,
+      firstPayment: firstPay,
+      monthlyPayment: pmt,
+      status: "Active",
+    });
+  }
+
+  // Update UI
+  updateCalculatorDisplay(nextDue, totalDue, drawBreakdowns);
+
+  // Show success message
+  const message = document.getElementById("calculatorMessage");
+  message.textContent = "Calculation complete!";
+  message.classList.add("show");
+  setTimeout(() => message.classList.remove("show"), 3000);
+}
+
+function updateCalculatorDisplay(nextDue, totalDue, drawBreakdowns) {
+  // Update summary section
+  document.getElementById("nextDueDate").textContent = nextDue
+    .toISOString()
+    .slice(0, 10);
+  document.getElementById("totalPayment").textContent = `$${totalDue.toFixed(
+    2
+  )}`;
+
+  // Update breakdown section
+  const breakdownContainer = document.getElementById("drawsBreakdown");
+  breakdownContainer.innerHTML = "";
+
+  drawBreakdowns.forEach((draw, index) => {
+    const drawItem = document.createElement("div");
+    drawItem.className = "draw-item";
+    drawItem.innerHTML = `
+      <h4>Draw #${index + 1}</h4>
+      <div class="draw-details">
+        <div class="draw-detail">
+          <strong>Amount:</strong>
+          <span>$${draw.amount.toLocaleString()}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Draw Date:</strong>
+          <span>${draw.date.toISOString().slice(0, 10)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>First Payment:</strong>
+          <span>${draw.firstPayment.toISOString().slice(0, 10)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Monthly Payment:</strong>
+          <span>$${draw.monthlyPayment.toFixed(2)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Status:</strong>
+          <span>${draw.status}</span>
+        </div>
+      </div>
+    `;
+    breakdownContainer.appendChild(drawItem);
+  });
+}
 
 // PDF Export Function using browser print
 function exportToPDF() {
@@ -248,3 +444,9 @@ function exportToPDF() {
     }, 1000);
   }, 500);
 }
+
+// Initialize everything when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  initializeTabs();
+  initializeCalculator();
+});
