@@ -21,6 +21,7 @@ agreement-generator/
 - **PDF Export**: Generate professional PDF documents using browser print functionality
 - **Form Validation**: Ensures required fields are completed before PDF generation
 - **Modern UI**: Clean, professional interface with smooth animations
+- **Payment Tracking**: Enter payments to see principal/interest breakdown and current balance
 
 ## Usage
 
