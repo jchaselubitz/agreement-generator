@@ -9,10 +9,32 @@ const fieldMappings = {
   borrower_business: ["display_borrower_business"],
   borrower_address: ["display_borrower_address"],
   borrower_email: ["display_borrower_email"],
-  credit_limit: ["display_credit_limit"],
+  credit_limit: ["display_credit_limit", "display_credit_limit_gbp"],
   lender_date: ["display_lender_date"],
   borrower_date: ["display_borrower_date"],
 };
+
+// Exchange rate for USD to GBP
+let usdToGbpRate = null;
+
+async function fetchExchangeRate() {
+  try {
+    const response = await fetch(
+      "https://api.exchangerate.host/latest?base=USD&symbols=GBP"
+    );
+    if (!response.ok) throw new Error("Network response was not ok");
+    const data = await response.json();
+    usdToGbpRate = data.rates.GBP;
+
+    // Update GBP display if credit limit already entered
+    const creditInput = document.getElementById("credit_limit");
+    if (creditInput && creditInput.value) {
+      updateContractDisplay("credit_limit", creditInput.value);
+    }
+  } catch (error) {
+    console.error("Failed to fetch exchange rate:", error);
+  }
+}
 
 // Tab Navigation
 function initializeTabs() {
@@ -36,6 +58,39 @@ function initializeTabs() {
 
 // Update contract display when form fields change
 function updateContractDisplay(fieldId, value) {
+  if (fieldId === "credit_limit") {
+    const usdElement = document.getElementById("display_credit_limit");
+    const gbpElement = document.getElementById("display_credit_limit_gbp");
+
+    if (value.trim() === "") {
+      if (usdElement)
+        usdElement.textContent = `[Amount]`;
+      if (gbpElement)
+        gbpElement.textContent = `[GBP Amount]`;
+      return;
+    }
+
+    const usdValue = parseFloat(value);
+    if (usdElement)
+      usdElement.textContent = usdValue.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+    if (gbpElement) {
+      if (usdToGbpRate) {
+        const gbpValue = usdValue * usdToGbpRate;
+        gbpElement.textContent = gbpValue.toLocaleString("en-GB", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      } else {
+        gbpElement.textContent = "N/A";
+      }
+    }
+    return;
+  }
+
   const displayIds = fieldMappings[fieldId];
   if (displayIds) {
     displayIds.forEach((displayId) => {
@@ -51,11 +106,7 @@ function updateContractDisplay(fieldId, value) {
               .replace(/\b\w/g, (l) => l.toUpperCase())}]`;
           }
         } else {
-          if (fieldId === "credit_limit") {
-            element.textContent = parseInt(value).toLocaleString();
-          } else {
-            element.textContent = value;
-          }
+          element.textContent = value;
         }
       }
     });
@@ -736,6 +787,7 @@ function exportToPDF() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
+  fetchExchangeRate();
   initializeTabs();
   initializeCalculator();
 });
