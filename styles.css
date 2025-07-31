@@ -1,0 +1,418 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f8fafc;
+    min-height: 100vh;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 2rem;
+    min-height: 100vh;
+}
+
+.form-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.contract-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    min-height: 800px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.form-title::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3rem;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 1px;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+}
+
+.form-group input, 
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    background: white;
+    color: #1e293b;
+    font-family: inherit;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input:hover, 
+.form-group textarea:hover {
+    border-color: #9ca3af;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.export-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1.5rem;
+    letter-spacing: 0.025em;
+    position: relative;
+    overflow: hidden;
+}
+
+.export-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.export-btn:hover::before {
+    left: 100%;
+}
+
+.export-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.export-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.contract-title {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+    position: relative;
+}
+
+.contract-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4rem;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 1px;
+}
+
+.contract-content {
+    line-height: 1.7;
+    color: #374151;
+    font-size: 0.875rem;
+    max-width: 65ch;
+    margin: 0 auto;
+}
+
+.contract-content h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.contract-content h3:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.contract-content p {
+    margin-bottom: 1rem;
+    text-align: justify;
+}
+
+.contract-content ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.contract-content li {
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.contract-content li::marker {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.field-highlight {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+    margin: 0 0.125rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-size: 0.8rem;
+}
+
+.section-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+    margin: 2rem 0;
+}
+
+.signature-section {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-top: 2rem;
+    border-left: 4px solid #3b82f6;
+}
+
+.signature-block {
+    margin-bottom: 2rem;
+}
+
+.signature-block:last-child {
+    margin-bottom: 0;
+}
+
+.signature-block p {
+    margin-bottom: 0.5rem;
+}
+
+.signature-line {
+    border-bottom: 1px solid #374151;
+    width: 250px;
+    height: 1.5rem;
+    display: inline-block;
+    margin: 0 0.5rem;
+}
+
+.success-message {
+    background: #10b981;
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.success-message.show {
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+    
+    .form-section {
+        position: static;
+        order: 2;
+    }
+    
+    .contract-section {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0.5rem;
+    }
+    
+    .form-section,
+    .contract-section {
+        padding: 1.5rem;
+    }
+    
+    .contract-title {
+        font-size: 1.5rem;
+    }
+    
+    .contract-content {
+        font-size: 0.8rem;
+    }
+    
+    .field-highlight {
+        min-width: 80px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Print styles for PDF generation */
+@media print {
+    body {
+        background: white !important;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .container {
+        display: block !important;
+        background: white !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        max-width: none !important;
+        min-height: auto !important;
+        padding: 0 !important;
+    }
+    
+    .form-section {
+        display: none !important;
+    }
+    
+    .contract-section {
+        padding: 1in !important;
+        background: white !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    
+    .contract-title {
+        color: black !important;
+        border-bottom: 2px solid black !important;
+    }
+    
+    .contract-content {
+        color: black !important;
+    }
+    
+    .contract-content h3 {
+        color: black !important;
+        page-break-after: avoid;
+        border-top: none !important;
+        padding-top: 0 !important;
+    }
+    
+    .field-highlight {
+        background: #f3f4f6 !important;
+        color: black !important;
+        border: 1px solid #d1d5db !important;
+        box-shadow: none !important;
+    }
+    
+    .section-divider {
+        background: black !important;
+        height: 1px !important;
+        page-break-after: avoid;
+    }
+    
+    .signature-section {
+        background: white !important;
+        border-left: 2px solid black !important;
+        page-break-inside: avoid;
+    }
+    
+    .signature-line {
+        border-bottom: 1px solid black !important;
+    }
+}
+
+.print-view {
+    display: none;
+}
+
+@media print {
+    .print-view {
+        display: block;
+    }
+}
