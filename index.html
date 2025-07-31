@@ -68,7 +68,7 @@
 
               <div class="form-group">
                 <label for="lender_email">Lender Email (Optional)</label>
-                <input type="email" id="lender_email" placeholder="write in" />
+                <input type="email" id="lender_email" placeholder="" />
               </div>
             </fieldset>
 
@@ -107,7 +107,7 @@
 
               <div class="form-group">
                 <label for="borrower_email">Borrower Email (Optional)</label>
-                <input type="email" id="borrower_email" placeholder="write in" />
+                <input type="email" id="borrower_email" placeholder="" />
               </div>
             </fieldset>
 
@@ -128,14 +128,14 @@
 
               <div class="form-group">
                 <label for="lender_date">Lender Signature Date (Optional)</label>
-                <input type="date" id="lender_date" placeholder="write in" />
+                <input type="date" id="lender_date" placeholder="" />
               </div>
 
               <div class="form-group">
                 <label for="borrower_date"
                   >Borrower Signature Date (Optional)</label
                 >
-                <input type="date" id="borrower_date" placeholder="write in" />
+                <input type="date" id="borrower_date" placeholder="" />
               </div>
             </fieldset>
 
@@ -383,7 +383,15 @@
               Interest rate: 7% annually, payments start first of next month.
             </p>
           </div>
-
+          <div class="form-group">
+            <label for="history_file">Import History CSV</label>
+            <input
+              type="file"
+              id="history_file"
+              accept=".csv"
+              onchange="importCSV(event)"
+            />
+          </div>
           <form id="calculatorForm" class="form-container">
             <div class="form-group">
               <label for="draw_count">Number of Draws</label>
@@ -419,22 +427,6 @@
               <!-- Payment inputs will be generated here -->
             </div>
 
-            <div class="form-group">
-              <button type="button" class="export-btn" onclick="exportCSV()">
-                Export History CSV
-              </button>
-            </div>
-
-            <div class="form-group">
-              <label for="history_file">Import History CSV</label>
-              <input
-                type="file"
-                id="history_file"
-                accept=".csv"
-                onchange="importCSV(event)"
-              />
-            </div>
-
             <button type="button" class="export-btn" onclick="calculatePayments()">
               <svg
                 width="16"
@@ -453,9 +445,17 @@
               Calculate Payments
             </button>
 
-            <div class="success-message" id="calculatorMessage">
+            <!-- <div class="success-message" id="calculatorMessage">
               Calculation complete!
-            </div>
+            </div> -->
+
+                         <div class="form-group">
+               <button type="button" class="export-btn outline" onclick="exportCSV()">
+                 Export History CSV
+               </button>
+             </div>
+
+        
           </form>
         </aside>
 

@@ -76,7 +76,7 @@ Object.keys(fieldMappings).forEach((fieldId) => {
 });
 
 // Calculator Configuration
-const ANNUAL_RATE = 0.07; // 7% per annum
+const ANNUAL_RATE = 0.1; // 7% per annum
 const MONTHLY_RATE = ANNUAL_RATE / 12;
 const END_DATE = new Date(2027, 7, 1); // JS months are 0-based: 7 → August
 const PAYEES = ["Jake", "Parents", "Alex"];
@@ -98,7 +98,10 @@ function monthsBetween(from, to) {
 }
 
 function monthsDiff(from, to) {
-  return (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+  return (
+    (to.getFullYear() - from.getFullYear()) * 12 +
+    (to.getMonth() - from.getMonth())
+  );
 }
 
 function addMonths(date, months) {
@@ -164,7 +167,8 @@ function generateDrawInputs() {
 }
 
 function generatePaymentInputs() {
-  const paymentCount = parseInt(document.getElementById("payment_count").value) || 0;
+  const paymentCount =
+    parseInt(document.getElementById("payment_count").value) || 0;
   const container = document.getElementById("payments-container");
 
   container.innerHTML = "";
@@ -198,9 +202,8 @@ function generatePaymentInputs() {
 
 function exportCSV() {
   const drawCount = parseInt(document.getElementById("draw_count").value) || 0;
-  const paymentCount = parseInt(
-    document.getElementById("payment_count").value
-  ) || 0;
+  const paymentCount =
+    parseInt(document.getElementById("payment_count").value) || 0;
   const rows = [["type", "amount", "date", "payee"]];
 
   for (let i = 1; i <= drawCount; i++) {
@@ -303,7 +306,8 @@ function calculatePayments() {
     return;
   }
 
-  const paymentCount = parseInt(document.getElementById("payment_count").value) || 0;
+  const paymentCount =
+    parseInt(document.getElementById("payment_count").value) || 0;
   const payments = [];
 
   for (let i = 1; i <= paymentCount; i++) {
@@ -373,7 +377,8 @@ function calculatePayments() {
     if (monthsPassed > 0) {
       for (const p in payeeTotals) {
         const interestAccrued =
-          payeeTotals[p].balance * (Math.pow(1 + MONTHLY_RATE, monthsPassed) - 1);
+          payeeTotals[p].balance *
+          (Math.pow(1 + MONTHLY_RATE, monthsPassed) - 1);
         payeeTotals[p].interestDue += interestAccrued;
         interestDue += interestAccrued;
       }
@@ -407,7 +412,8 @@ function calculatePayments() {
   if (monthsToToday > 0) {
     for (const p in payeeTotals) {
       const interestAccrued =
-        payeeTotals[p].balance * (Math.pow(1 + MONTHLY_RATE, monthsToToday) - 1);
+        payeeTotals[p].balance *
+        (Math.pow(1 + MONTHLY_RATE, monthsToToday) - 1);
       payeeTotals[p].interestDue += interestAccrued;
       interestDue += interestAccrued;
     }
@@ -448,9 +454,9 @@ function updateCalculatorDisplay(
   document.getElementById("nextDueDate").textContent = nextDue
     .toISOString()
     .slice(0, 10);
-  document.getElementById("currentBalance").textContent = `$${currentBalance.toFixed(
-    2
-  )}`;
+  document.getElementById(
+    "currentBalance"
+  ).textContent = `$${currentBalance.toFixed(2)}`;
   const payeeContainer = document.getElementById("payeeSummary");
   payeeContainer.innerHTML = "";
   Object.entries(payeeBalances).forEach(([p, amt]) => {
