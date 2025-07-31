@@ -835,9 +835,18 @@ function exportToPDF() {
   }, 500);
 }
 
-// Initialize everything when DOM is loaded
-document.addEventListener("DOMContentLoaded", function () {
+// Initialize everything when DOM is ready. This covers scenarios where the
+// script is loaded after the DOMContentLoaded event has already fired (e.g.
+// when the browser loads the script asynchronously in production environments
+// like GitHub Pages).
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchExchangeRate();
+    initializeTabs();
+    initializeCalculator();
+  });
+} else {
   fetchExchangeRate();
   initializeTabs();
   initializeCalculator();
-});
+}
