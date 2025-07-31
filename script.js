@@ -96,6 +96,16 @@ function monthsBetween(from, to) {
   );
 }
 
+function monthsDiff(from, to) {
+  return (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+}
+
+function addMonths(date, months) {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+}
+
 function monthlyPayment(principal, nMonths) {
   const r = MONTHLY_RATE;
   // standard amortization formula: P * [r (1+r)^N] / [(1+r)^N – 1]
@@ -111,6 +121,11 @@ function initializeCalculator() {
   if (drawCountInput) {
     drawCountInput.addEventListener("change", generateDrawInputs);
     generateDrawInputs(); // Generate initial draw input
+  }
+  const paymentCountInput = document.getElementById("payment_count");
+  if (paymentCountInput) {
+    paymentCountInput.addEventListener("change", generatePaymentInputs);
+    generatePaymentInputs();
   }
 }
 
@@ -140,6 +155,112 @@ function generateDrawInputs() {
   }
 }
 
+function generatePaymentInputs() {
+  const paymentCount = parseInt(document.getElementById("payment_count").value) || 0;
+  const container = document.getElementById("payments-container");
+
+  container.innerHTML = "";
+
+  for (let i = 1; i <= paymentCount; i++) {
+    const paymentGroup = document.createElement("div");
+    paymentGroup.className = "draw-input-group";
+    paymentGroup.innerHTML = `
+      <h4>Payment #${i}</h4>
+      <div class="draw-input-row">
+        <div class="form-group">
+          <label for="payment_amount_${i}">Amount (USD)</label>
+          <input type="number" id="payment_amount_${i}" placeholder="500" step="0.01" min="0" required />
+        </div>
+        <div class="form-group">
+          <label for="payment_date_${i}">Date</label>
+          <input type="date" id="payment_date_${i}" required />
+        </div>
+      </div>
+    `;
+    container.appendChild(paymentGroup);
+  }
+}
+
+function exportCSV() {
+  const drawCount = parseInt(document.getElementById("draw_count").value) || 0;
+  const paymentCount = parseInt(
+    document.getElementById("payment_count").value
+  ) || 0;
+  const rows = [["type", "amount", "date"]];
+
+  for (let i = 1; i <= drawCount; i++) {
+    const amount = document.getElementById(`draw_amount_${i}`)?.value;
+    const date = document.getElementById(`draw_date_${i}`)?.value;
+    if (amount && date) {
+      rows.push(["draw", amount, date]);
+    }
+  }
+
+  for (let i = 1; i <= paymentCount; i++) {
+    const amount = document.getElementById(`payment_amount_${i}`)?.value;
+    const date = document.getElementById(`payment_date_${i}`)?.value;
+    if (amount && date) {
+      rows.push(["payment", amount, date]);
+    }
+  }
+
+  if (rows.length === 1) {
+    alert("No draws or payments to export.");
+    return;
+  }
+
+  const csvContent = rows.map((r) => r.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `history-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const text = e.target.result;
+    const lines = text.trim().split(/\r?\n/).slice(1);
+    const draws = [];
+    const payments = [];
+
+    lines.forEach((line) => {
+      const [type, amountStr, date] = line.split(",");
+      const amount = parseFloat(amountStr);
+      if (type === "draw") {
+        draws.push({ amount, date });
+      } else if (type === "payment") {
+        payments.push({ amount, date });
+      }
+    });
+
+    document.getElementById("draw_count").value = draws.length;
+    generateDrawInputs();
+    draws.forEach((d, i) => {
+      document.getElementById(`draw_amount_${i + 1}`).value = d.amount;
+      document.getElementById(`draw_date_${i + 1}`).value = d.date;
+    });
+
+    document.getElementById("payment_count").value = payments.length;
+    generatePaymentInputs();
+    payments.forEach((p, i) => {
+      document.getElementById(`payment_amount_${i + 1}`).value = p.amount;
+      document.getElementById(`payment_date_${i + 1}`).value = p.date;
+    });
+  };
+
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
 function calculatePayments() {
   const drawCount = parseInt(document.getElementById("draw_count").value) || 1;
   const draws = [];
@@ -161,18 +282,28 @@ function calculatePayments() {
     return;
   }
 
+  const paymentCount = parseInt(document.getElementById("payment_count").value) || 0;
+  const payments = [];
+
+  for (let i = 1; i <= paymentCount; i++) {
+    const amountInput = document.getElementById(`payment_amount_${i}`);
+    const dateInput = document.getElementById(`payment_date_${i}`);
+    if (amountInput && dateInput && amountInput.value && dateInput.value) {
+      const amount = parseFloat(amountInput.value);
+      const date = new Date(dateInput.value);
+      payments.push({ amount, date });
+    }
+  }
+
   // Calculate next due date
   const today = new Date();
   const nextDue = firstOfNextMonth(today);
 
-  // Calculate total payment
-  let totalDue = 0;
+  // Build draw breakdown
   const drawBreakdowns = [];
-
   for (const { amount, date } of draws) {
     const firstPay = firstOfNextMonth(date);
     if (nextDue < firstPay) {
-      // repayment hasn't started yet
       drawBreakdowns.push({
         amount,
         date,
@@ -182,11 +313,8 @@ function calculatePayments() {
       });
       continue;
     }
-
     const nRem = monthsBetween(nextDue, END_DATE);
     const pmt = monthlyPayment(amount, nRem);
-    totalDue += pmt;
-
     drawBreakdowns.push({
       amount,
       date,
@@ -196,8 +324,56 @@ function calculatePayments() {
     });
   }
 
+  // Compute balance and payment breakdown
+  const events = [
+    ...draws.map((d) => ({ type: "draw", ...d })),
+    ...payments.map((p) => ({ type: "payment", ...p })),
+  ].sort((a, b) => a.date - b.date);
+
+  let balance = 0;
+  let interestDue = 0;
+  const paymentBreakdowns = [];
+  let lastDate = events[0] ? events[0].date : today;
+
+  for (const ev of events) {
+    const monthsPassed = monthsDiff(lastDate, ev.date);
+    if (monthsPassed > 0) {
+      const interestAccrued =
+        balance * (Math.pow(1 + MONTHLY_RATE, monthsPassed) - 1);
+      interestDue += interestAccrued;
+      lastDate = addMonths(lastDate, monthsPassed);
+    }
+
+    if (ev.type === "draw") {
+      balance += ev.amount;
+    } else {
+      let remaining = ev.amount;
+      const interestPaid = Math.min(interestDue, remaining);
+      interestDue -= interestPaid;
+      remaining -= interestPaid;
+      const principalPaid = Math.min(balance, remaining);
+      balance -= principalPaid;
+      paymentBreakdowns.push({
+        amount: ev.amount,
+        date: ev.date,
+        interestPaid,
+        principalPaid,
+      });
+    }
+  }
+
+  const monthsToToday = monthsDiff(lastDate, today);
+  if (monthsToToday > 0) {
+    const interestAccrued =
+      balance * (Math.pow(1 + MONTHLY_RATE, monthsToToday) - 1);
+    interestDue += interestAccrued;
+    lastDate = addMonths(lastDate, monthsToToday);
+  }
+
+  const currentBalance = balance + interestDue;
+
   // Update UI
-  updateCalculatorDisplay(nextDue, totalDue, drawBreakdowns);
+  updateCalculatorDisplay(nextDue, currentBalance, drawBreakdowns, paymentBreakdowns);
 
   // Show success message
   const message = document.getElementById("calculatorMessage");
@@ -206,16 +382,21 @@ function calculatePayments() {
   setTimeout(() => message.classList.remove("show"), 3000);
 }
 
-function updateCalculatorDisplay(nextDue, totalDue, drawBreakdowns) {
+function updateCalculatorDisplay(
+  nextDue,
+  currentBalance,
+  drawBreakdowns,
+  paymentBreakdowns
+) {
   // Update summary section
   document.getElementById("nextDueDate").textContent = nextDue
     .toISOString()
     .slice(0, 10);
-  document.getElementById("totalPayment").textContent = `$${totalDue.toFixed(
+  document.getElementById("currentBalance").textContent = `$${currentBalance.toFixed(
     2
   )}`;
 
-  // Update breakdown section
+  // Update draw breakdown
   const breakdownContainer = document.getElementById("drawsBreakdown");
   breakdownContainer.innerHTML = "";
 
@@ -248,6 +429,37 @@ function updateCalculatorDisplay(nextDue, totalDue, drawBreakdowns) {
       </div>
     `;
     breakdownContainer.appendChild(drawItem);
+  });
+
+  // Update payment breakdown
+  const paymentContainer = document.getElementById("paymentsBreakdown");
+  paymentContainer.innerHTML = "";
+
+  paymentBreakdowns.forEach((pay, index) => {
+    const payItem = document.createElement("div");
+    payItem.className = "draw-item";
+    payItem.innerHTML = `
+      <h4>Payment #${index + 1}</h4>
+      <div class="draw-details">
+        <div class="draw-detail">
+          <strong>Amount:</strong>
+          <span>$${pay.amount.toFixed(2)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Date:</strong>
+          <span>${pay.date.toISOString().slice(0, 10)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Interest Paid:</strong>
+          <span>$${pay.interestPaid.toFixed(2)}</span>
+        </div>
+        <div class="draw-detail">
+          <strong>Principal Paid:</strong>
+          <span>$${pay.principalPaid.toFixed(2)}</span>
+        </div>
+      </div>
+    `;
+    paymentContainer.appendChild(payItem);
   });
 }
 

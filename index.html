@@ -402,6 +402,39 @@
               <!-- Draw inputs will be generated here -->
             </div>
 
+            <div class="form-group">
+              <label for="payment_count">Number of Payments</label>
+              <input
+                type="number"
+                id="payment_count"
+                placeholder="Enter number of payments"
+                min="0"
+                max="20"
+                value="0"
+                required
+              />
+            </div>
+
+            <div id="payments-container">
+              <!-- Payment inputs will be generated here -->
+            </div>
+
+            <div class="form-group">
+              <button type="button" class="export-btn" onclick="exportCSV()">
+                Export History CSV
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label for="history_file">Import History CSV</label>
+              <input
+                type="file"
+                id="history_file"
+                accept=".csv"
+                onchange="importCSV(event)"
+              />
+            </div>
+
             <button type="button" class="export-btn" onclick="calculatePayments()">
               <svg
                 width="16"
@@ -433,13 +466,17 @@
             <div class="summary-section">
               <h3>Next Payment Due</h3>
               <p class="next-due-date" id="nextDueDate">Loading...</p>
-              
-              <h3>Total Monthly Payment</h3>
-              <p class="total-payment" id="totalPayment">$0.00</p>
+
+              <h3>Current Amount Owed</h3>
+              <p class="total-payment" id="currentBalance">$0.00</p>
             </div>
 
             <div class="draws-breakdown" id="drawsBreakdown">
               <!-- Draw breakdown will be generated here -->
+            </div>
+
+            <div class="payments-breakdown" id="paymentsBreakdown">
+              <!-- Payment breakdown will be generated here -->
             </div>
 
             <div class="calculator-notes">
