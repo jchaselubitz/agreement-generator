@@ -76,7 +76,7 @@ Object.keys(fieldMappings).forEach((fieldId) => {
 });
 
 // Calculator Configuration
-const ANNUAL_RATE = 0.1; // 7% per annum
+const ANNUAL_RATE = 0.1; // 10% per annum
 const MONTHLY_RATE = ANNUAL_RATE / 12;
 const END_DATE = new Date(2027, 7, 1); // JS months are 0-based: 7 → August
 const PAYEES = ["Jake", "Parents", "Alex"];
